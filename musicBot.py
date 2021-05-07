@@ -8,14 +8,14 @@ from discord.ext import commands
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
-suggChannel = '840042019971661825'
+suggChannel = '839962435044900874'
 
 bot = Bot(command_prefix='$')
 dictionary = {}
 
 async def sendPoll():
-    channel = bot.get_channel(840042019971661825)
-    pollString = '/poll "<@&840095047801372762>, here is the poll for the album of the week:"'
+    channel = bot.get_channel(839962435044900874)
+    pollString = '/poll "<@&839958672868245504>, here is the poll for the album of the week:"'
     for i, j in dictionary.items():
         pollString += f' "{i} - {j}"'
     await channel.send(pollString)
@@ -26,7 +26,6 @@ async def sendPoll():
 
 @bot.command(name='suggest')
 async def suggest(ctx, *, arg):
-    #if(str(ctx.channel.id) == '839962435044900874'):
     if(str(ctx.channel.id) == suggChannel):
         dictionary[ctx.author] = arg
         await ctx.message.add_reaction("👍")
