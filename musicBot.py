@@ -23,6 +23,7 @@ async def sendPoll():
         if message.author == bot.user:
             await message.delete()
             break
+    dictionary.clear()
 
 @bot.command(name='suggest')
 async def suggest(ctx, *, arg):
