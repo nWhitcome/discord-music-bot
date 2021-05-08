@@ -14,7 +14,7 @@ bot = Bot(command_prefix='$')
 dictionary = {}
 
 async def sendPoll():
-    channel = bot.get_channel(839962435044900874)
+    channel = bot.get_channel(839961783498571867)
     pollString = '/poll "<@&839958672868245504>, here is the poll for the album of the week:"'
     for i, j in dictionary.items():
         pollString += f' "{i} - {j}"'
