@@ -41,7 +41,7 @@ async def sendPoll():
 async def suggest(ctx, *, arg):
     print("Received suggestion")
     if(str(ctx.channel.id) == suggChannel or str(ctx.channel.id) == testChannel):
-        dictionary[ctx.author] = arg
+        dictionary[str(ctx.author)] = str(arg)
         conn = sqlite3.connect('weeklyData.db')
         c = conn.cursor()
         c.execute('INSERT OR REPLACE INTO weekly(id, content) VALUES(?,?);', (str(ctx.author), str(arg)))
@@ -54,9 +54,12 @@ async def listSuggestions(ctx):
     print("Listing suggestions")
     listString = ""
     if(str(ctx.channel.id) == suggChannel or str(ctx.channel.id) == testChannel):
-        for k, v in dictionary.items():
-            listString += f'{k} - {v}\n'
-        await ctx.send(listString)
+        if(not dictionary):
+            await ctx.send("No suggestions... yet")
+        else:
+            for k, v in dictionary.items():
+                listString += f'{k} - {v}\n'
+            await ctx.send(listString)
 
 # Backup method that can only be called in the TestBot server that puts the album choice poll up in case it fails for some reason
 @bot.command(name='poll')
@@ -69,6 +72,19 @@ async def poll(ctx):
 async def choosethewinner(ctx):
     if(str(ctx.channel.id) == testChannel):
         chooseWinner()
+
+# Deletes your suggestion for the week
+@bot.command(name='delete')
+async def delete(ctx):
+    if(str(ctx.channel.id) == testChannel):
+        print(ctx.author)
+        conn = sqlite3.connect('weeklyData.db')
+        c = conn.cursor()
+        c.execute("DELETE FROM weekly WHERE id = ?;", (str(ctx.author), ))
+        conn.commit()
+        dictionary.pop(str(ctx.author))
+        await ctx.message.add_reaction("👍")
+
 
 # Chooses a winner from the album poll on the Covid Club server
 async def chooseWinner():
@@ -106,7 +122,7 @@ async def on_ready():
 
     rows = c.fetchall()
     for row in rows:
-        dictionary[row[0]] = row[1]
+        dictionary[str(row[0])] = str(row[1])
 
     scheduler = AsyncIOScheduler()
     scheduler.add_job(sendPoll, 'cron', day_of_week='sat', hour=2)
