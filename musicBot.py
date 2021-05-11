@@ -44,7 +44,7 @@ async def suggest(ctx, *, arg):
         dictionary[ctx.author] = arg
         conn = sqlite3.connect('weeklyData.db')
         c = conn.cursor()
-        c.execute('INSERT INTO weekly(id, content) VALUES(?,?);', (str(ctx.author), str(arg)))
+        c.execute('INSERT OR REPLACE INTO weekly(id, content) VALUES(?,?);', (str(ctx.author), str(arg)))
         conn.commit()
         await ctx.message.add_reaction("👍")
 
