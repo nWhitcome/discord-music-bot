@@ -52,9 +52,11 @@ async def suggest(ctx, *, arg):
 @bot.command(name='list')
 async def listSuggestions(ctx):
     print("Listing suggestions")
+    listString = ""
     if(str(ctx.channel.id) == suggChannel or str(ctx.channel.id) == testChannel):
         for k, v in dictionary.items():
-            await ctx.send(f'{k} - {v}')
+            listString += f'{k} - {v}\n'
+        await ctx.send(listString)
 
 # Backup method that can only be called in the TestBot server that puts the album choice poll up in case it fails for some reason
 @bot.command(name='poll')
