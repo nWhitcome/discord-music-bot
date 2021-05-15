@@ -125,8 +125,8 @@ async def on_ready():
         dictionary[str(row[0])] = str(row[1])
 
     scheduler = AsyncIOScheduler()
-    scheduler.add_job(sendPoll, 'cron', day_of_week='sat', hour=2)
-    scheduler.add_job(chooseWinner, 'cron', day_of_week='sun', hour=2)
+    scheduler.add_job(sendPoll, 'cron', day_of_week='sun', hour=19)
+    scheduler.add_job(chooseWinner, 'cron', day_of_week='mon', hour=19)
     scheduler.start()
 
 bot.run(TOKEN)
