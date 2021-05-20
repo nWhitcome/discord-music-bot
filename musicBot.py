@@ -7,6 +7,8 @@ from apscheduler.triggers.cron import CronTrigger
 from discord.ext import commands
 import sqlite3
 import random
+import calendar
+import datetime
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
@@ -16,25 +18,34 @@ testChannel = '840042019971661825'
 bot = Bot(command_prefix='$')
 dictionary = {}
 
+# Gets the last Monday of the month
+def getLastMonday():
+    now = datetime.datetime.now()
+
+    last_monday = max(week[calendar.MONDAY]
+        for week in calendar.monthcalendar(now.year, now.month))
+    return int(last_monday)
+
 # Sends out a poll so people can vote on album of the week
 async def sendPoll():
-    print("Posting poll...")
-    channel = bot.get_channel(839961783498571867)
-    pollString = '/poll "<@&839958672868245504>, here is the poll for the album of the week:"'
-    for i, j in dictionary.items():
-        pollString += f' "{i} - {j}"'
-    await channel.send(pollString)
-    async for message in channel.history(limit = 10):
-        if message.author == bot.user:
-            await message.delete()
-            break
-    dictionary.clear()
+    if(int(datetime.datetime.now().day) + 1 != getLastMonday()):
+        print("Posting poll...")
+        channel = bot.get_channel(839961783498571867)
+        pollString = '/poll "<@&839958672868245504>, here is the poll for the album of the week:"'
+        for i, j in dictionary.items():
+            pollString += f' "{i} - {j}"'
+        await channel.send(pollString)
+        async for message in channel.history(limit = 10):
+            if message.author == bot.user:
+                await message.delete()
+                break
+        dictionary.clear()
 
-    # Deletes all of the previous week's suggestions
-    conn = sqlite3.connect('weeklyData.db')
-    c = conn.cursor()
-    c.execute('DELETE FROM weekly;')
-    conn.commit()
+        # Deletes all of the previous week's suggestions
+        conn = sqlite3.connect('weeklyData.db')
+        c = conn.cursor()
+        c.execute('DELETE FROM weekly;')
+        conn.commit()
 
 # Allows users to submit a suggestion for album of the week, which is then stored in a database
 @bot.command(name='suggest')
@@ -85,30 +96,50 @@ async def delete(ctx):
         dictionary.pop(str(ctx.author))
         await ctx.message.add_reaction("👍")
 
-
 # Chooses a winner from the album poll on the Covid Club server
 async def chooseWinner():
     channel = bot.get_channel(839961783498571867)
 
-    # Finds the last poll posted in the music announcements channel and gets the winner. Myself and the admins are the only ones that can post in that channel.
-    async for message in channel.history(limit = 10):
-        if message.author.id == 324631108731928587:
-            max = 0
-            index = []
-            i = 0
-            while i <  len(message.reactions):
-                if(int(message.reactions[i].count) > max):
-                    max = message.reactions[i].count
-                    index = [i]
-                elif message.reactions[i].count == max:
-                    index.append(i)
-                i = i+1
-            await channel.send('<@&839958672868245504> And the winning album for the week is:')
+    if(int(datetime.datetime.now().day) != getLastMonday()):
+        # Finds the last poll posted in the music announcements channel and gets the winner. Myself and the admins are the only ones that can post in that channel.
+        async for message in channel.history(limit = 10):
+            if message.author.id == 324631108731928587:
+                max = 0
+                index = []
+                i = 0
+                while i <  len(message.reactions):
+                    if(int(message.reactions[i].count) > max):
+                        max = message.reactions[i].count
+                        index = [i]
+                    elif message.reactions[i].count == max:
+                        index.append(i)
+                    i = i+1
+                await channel.send('<@&839958672868245504> And the winning album for the week is:')
 
-            # Breaks ties with the random function
-            await channel.send(message.embeds[0].description.split("\n")[random.choice(index)])
-            await channel.send("Suggestions are now open for the following week, so make sure to get them in by Saturday at 2 PM CST!")
-            break
+                # Breaks ties with the random function
+                await channel.send(message.embeds[0].description.split("\n")[random.choice(index)])
+                if(int(datetime.datetime.now().day) + 7 == getLastMonday()):
+                    await channel.send("It's singles week! If you have a song you want everyone to hear during the meeting next week, use the suggest command with the name of the song and the artist before then!")
+                else:
+                    await channel.send("Suggestions are now open for the following week, so make sure to get them in by Saturday at 8 PM CST!")
+                break
+    else:
+        print("Listing singles week songs...")
+        channel = bot.get_channel(839961783498571867)
+        if(not dictionary):
+            await channel.send("No suggestions :(")
+        else:
+            listString = "Here are the songs for singles week: \n"
+            for k, v in dictionary.items():
+                listString += f'{k} - {v}\n'
+            await channel.send(listString)
+            dictionary.clear()
+
+            # Deletes all of the previous week's suggestions
+            conn = sqlite3.connect('weeklyData.db')
+            c = conn.cursor()
+            c.execute('DELETE FROM weekly;')
+            conn.commit()
 
 @bot.event
 async def on_ready():
