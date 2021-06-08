@@ -16,6 +16,8 @@ suggChannel = '839962435044900874'
 testChannel = '840042019971661825'
 
 bot = Bot(command_prefix='$')
+
+bot.runOnceFlag = 0
 dictionary = {}
 
 # Gets the last Monday of the month
@@ -25,6 +27,27 @@ def getLastMonday():
     last_monday = max(week[calendar.MONDAY]
         for week in calendar.monthcalendar(now.year, now.month))
     return int(last_monday)
+
+def runOnce():
+    if(bot.runOnceFlag == 0):
+        print("Ready")
+        conn = sqlite3.connect('weeklyData.db')
+        makeTable = 'CREATE TABLE IF NOT EXISTS weekly (id text PRIMARY KEY, content text NOT NULL); '
+
+        c = conn.cursor()
+        c.execute(makeTable)
+        c.execute('SELECT * FROM weekly;')
+
+        rows = c.fetchall()
+        for row in rows:
+            dictionary[str(row[0])] = str(row[1])
+
+        scheduler = AsyncIOScheduler()
+        scheduler.add_job(sendPoll, 'cron', day_of_week='sun', hour=20)
+        scheduler.add_job(chooseWinner, 'cron', day_of_week='mon', hour=20)
+        scheduler.start()
+
+        bot.runOnceFlag = 1
 
 # Sends out a poll so people can vote on album of the week
 async def sendPoll():
@@ -143,21 +166,6 @@ async def chooseWinner():
 
 @bot.event
 async def on_ready():
-    print("Ready")
-    conn = sqlite3.connect('weeklyData.db')
-    makeTable = 'CREATE TABLE IF NOT EXISTS weekly (id text PRIMARY KEY, content text NOT NULL); '
-
-    c = conn.cursor()
-    c.execute(makeTable)
-    c.execute('SELECT * FROM weekly;')
-
-    rows = c.fetchall()
-    for row in rows:
-        dictionary[str(row[0])] = str(row[1])
-
-    scheduler = AsyncIOScheduler()
-    scheduler.add_job(sendPoll, 'cron', day_of_week='sun', hour=20)
-    scheduler.add_job(chooseWinner, 'cron', day_of_week='mon', hour=20)
-    scheduler.start()
+    runOnce()
 
 bot.run(TOKEN)
