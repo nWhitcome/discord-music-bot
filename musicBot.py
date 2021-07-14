@@ -29,7 +29,7 @@ def hourToPrintStandardTime(hour, minute):
         printableHour = hour - 12
     if (hour >= 11 and hour < 24):
         printableAmPm = 'PM'
-    return str(printableHour) + ' ' + str(printableAmPm) + ':' + str(minute).zfill(2) + ' CST'
+    return str(printableHour) + ':' + str(minute).zfill(2) + ' ' + str(printableAmPm) + ' CST'
 
 def runOnce():
     if(bot.runOnceFlag == 0):
@@ -49,14 +49,15 @@ def runOnce():
         scheduler.add_job(sendPoll, 'cron', day_of_week=config.pollDay, hour=config.pollHour, minute=config.pollMinute)
         scheduler.add_job(chooseWinner, 'cron', day_of_week='tue', hour=config.meetingHour, minute=config.meetingMinute)
         scheduler.start()
-
+        print("Poll set for " + hourToPrintStandardTime(config.pollHour, config.pollMinute))
+        print("Meeting set for " + hourToPrintStandardTime(config.meetingHour, config.meetingMinute))
         bot.runOnceFlag = 1
 
 # Sends out a poll so people can vote on album of the week
 async def sendPoll():
     if(int(datetime.datetime.now().day) + 1 != getLastMeetingDay()):
         print("Posting poll...")
-        channel = bot.get_channel(839961783498571867)
+        channel = bot.get_channel(config.announcementChannel)
         pollString = '/poll "<@&839958672868245504>, here is the poll for the album of the week:"'
         for i, j in dictionary.items():
             pollString += f' "{i} - {j}"'
@@ -124,7 +125,7 @@ async def delete(ctx):
 
 # Chooses a winner from the album poll on the Covid Club server
 async def chooseWinner():
-    channel = bot.get_channel(839961783498571867)
+    channel = bot.get_channel(config.announcementChannel)
 
     if(int(datetime.datetime.now().day) != getLastMeetingDay()):
         # Finds the last poll posted in the music announcements channel and gets the winner. Myself and the admins are the only ones that can post in that channel.
@@ -151,7 +152,6 @@ async def chooseWinner():
                 break
     else:
         print("Listing singles week songs...")
-        channel = bot.get_channel(839961783498571867)
         if(not dictionary):
             await channel.send("No suggestions :(")
         else:

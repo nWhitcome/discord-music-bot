@@ -8,6 +8,7 @@ load_dotenv()
 
 TOKEN = os.getenv('DISCORD_TOKEN')
 suggChannel = '839962435044900874'
+announcementChannel = '839961783498571867'
 testChannel = '840042019971661825'
 commandPrefix = '$'
 
