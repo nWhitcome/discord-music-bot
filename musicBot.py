@@ -49,8 +49,8 @@ def runOnce():
         scheduler.add_job(sendPoll, 'cron', day_of_week=config.pollDay, hour=config.pollHour, minute=config.pollMinute)
         scheduler.add_job(chooseWinner, 'cron', day_of_week='tue', hour=config.meetingHour, minute=config.meetingMinute)
         scheduler.start()
-        print("Poll set for " + hourToPrintStandardTime(config.pollHour, config.pollMinute))
-        print("Meeting set for " + hourToPrintStandardTime(config.meetingHour, config.meetingMinute))
+        print("Poll set for " + calendar.day_name[config.pollDay] + " " + hourToPrintStandardTime(config.pollHour, config.pollMinute))
+        print("Meeting set for " + calendar.day_name[config.meetingDay] + " " + hourToPrintStandardTime(config.meetingHour, config.meetingMinute))
         bot.runOnceFlag = 1
 
 # Sends out a poll so people can vote on album of the week
