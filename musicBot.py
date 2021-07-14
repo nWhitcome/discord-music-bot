@@ -17,21 +17,26 @@ testChannel = '840042019971661825'
 
 bot = Bot(command_prefix='$')
 
-pollHour = os.getenv('POLL_HOUR') or 20
-meetingHour = os.getenv('MEETING_HOUR') or 20
 
 bot.runOnceFlag = 0
 dictionary = {}
 
-# Gets the last Monday of the month
-def getLastMonday():
+# Config
+pollDay = os.getenv('POLL_DAY') or calendar.SUNDAY
+pollHour = os.getenv('POLL_HOUR') or 20
+pollMinute = os.getenv('POLL_MINUTE') or 0
+meetingDay = os.getenv('MEETING_DAY') or calendar.MONDAY
+meetingHour = os.getenv('MEETING_HOUR') or 20
+meetingMinute = os.getenv('MEETING_MINUTE') or 0
+
+# Gets the last meeting day of the month
+def getLastMeetingDay():
     now = datetime.datetime.now()
-
-    last_monday = max(week[calendar.MONDAY]
+    last_day = max(week[meetingDay]
         for week in calendar.monthcalendar(now.year, now.month))
-    return int(last_monday)
+    return int(last_day)
 
-def hourToPrintStandardTime(hour):
+def hourToPrintStandardTime(hour, minute):
     printableHour = hour
     printableAmPm = 'AM'
     if (hour <= 0 or hour >= 24):
@@ -40,7 +45,7 @@ def hourToPrintStandardTime(hour):
         printableHour = hour - 12
     if (hour >= 11 and hour < 24):
         printableAmPm = 'PM'
-    return str(printableHour) + ' ' + str(printableAmPm) + ' CST'
+    return str(printableHour) + ' ' + str(printableAmPm) + ':' + str(minute).zfill(2) + ' CST'
 
 def runOnce():
     if(bot.runOnceFlag == 0):
@@ -57,15 +62,15 @@ def runOnce():
             dictionary[str(row[0])] = str(row[1])
 
         scheduler = AsyncIOScheduler()
-        scheduler.add_job(sendPoll, 'cron', day_of_week='sun', hour=pollHour)
-        scheduler.add_job(chooseWinner, 'cron', day_of_week='mon', hour=meetingHour)
+        scheduler.add_job(sendPoll, 'cron', day_of_week=pollDay, hour=pollHour, minute=pollMinute)
+        scheduler.add_job(chooseWinner, 'cron', day_of_week='tue', hour=meetingHour, minute=meetingMinute)
         scheduler.start()
 
         bot.runOnceFlag = 1
 
 # Sends out a poll so people can vote on album of the week
 async def sendPoll():
-    if(int(datetime.datetime.now().day) + 1 != getLastMonday()):
+    if(int(datetime.datetime.now().day) + 1 != getLastMeetingDay()):
         print("Posting poll...")
         channel = bot.get_channel(839961783498571867)
         pollString = '/poll "<@&839958672868245504>, here is the poll for the album of the week:"'
@@ -137,7 +142,7 @@ async def delete(ctx):
 async def chooseWinner():
     channel = bot.get_channel(839961783498571867)
 
-    if(int(datetime.datetime.now().day) != getLastMonday()):
+    if(int(datetime.datetime.now().day) != getLastMeetingDay()):
         # Finds the last poll posted in the music announcements channel and gets the winner. Myself and the admins are the only ones that can post in that channel.
         async for message in channel.history(limit = 10):
             if message.author.id == 324631108731928587:
@@ -155,10 +160,10 @@ async def chooseWinner():
 
                 # Breaks ties with the random function
                 await channel.send(message.embeds[0].description.split("\n")[random.choice(index)])
-                if(int(datetime.datetime.now().day) + 7 == getLastMonday()):
+                if(int(datetime.datetime.now().day) + 7 == getLastMeetingDay()):
                     await channel.send("It's singles week! If you have a song you want everyone to hear during the meeting next week, use the suggest command with the name of the song and the artist before then!")
                 else:
-                    await channel.send("Suggestions are now open for the following week, so make sure to get them in by Sunday at " + hourToPrintStandardTime(pollHour) + "!")
+                    await channel.send("Suggestions are now open for the following week, so make sure to get them in by " + calendar.day_name[pollDay] + " at " + hourToPrintStandardTime(pollHour, pollMinute) + "!")
                 break
     else:
         print("Listing singles week songs...")
