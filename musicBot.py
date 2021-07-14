@@ -17,6 +17,9 @@ testChannel = '840042019971661825'
 
 bot = Bot(command_prefix='$')
 
+pollHour = os.getenv('POLL_HOUR') or 20
+meetingHour = os.getenv('MEETING_HOUR') or 20
+
 bot.runOnceFlag = 0
 dictionary = {}
 
@@ -27,6 +30,17 @@ def getLastMonday():
     last_monday = max(week[calendar.MONDAY]
         for week in calendar.monthcalendar(now.year, now.month))
     return int(last_monday)
+
+def hourToPrintStandardTime(hour):
+    printableHour = hour
+    printableAmPm = 'AM'
+    if (hour <= 0 or hour >= 24):
+        printableHour = 12
+    elif (hour >= 13):
+        printableHour = hour - 12
+    if (hour >= 11 and hour < 24):
+        printableAmPm = 'PM'
+    return str(printableHour) + ' ' + str(printableAmPm) + ' CST'
 
 def runOnce():
     if(bot.runOnceFlag == 0):
@@ -43,8 +57,8 @@ def runOnce():
             dictionary[str(row[0])] = str(row[1])
 
         scheduler = AsyncIOScheduler()
-        scheduler.add_job(sendPoll, 'cron', day_of_week='sun', hour=20)
-        scheduler.add_job(chooseWinner, 'cron', day_of_week='mon', hour=20)
+        scheduler.add_job(sendPoll, 'cron', day_of_week='sun', hour=pollHour)
+        scheduler.add_job(chooseWinner, 'cron', day_of_week='mon', hour=meetingHour)
         scheduler.start()
 
         bot.runOnceFlag = 1
@@ -144,7 +158,7 @@ async def chooseWinner():
                 if(int(datetime.datetime.now().day) + 7 == getLastMonday()):
                     await channel.send("It's singles week! If you have a song you want everyone to hear during the meeting next week, use the suggest command with the name of the song and the artist before then!")
                 else:
-                    await channel.send("Suggestions are now open for the following week, so make sure to get them in by Saturday at 8 PM CST!")
+                    await channel.send("Suggestions are now open for the following week, so make sure to get them in by Sunday at " + hourToPrintStandardTime(pollHour) + "!")
                 break
     else:
         print("Listing singles week songs...")
