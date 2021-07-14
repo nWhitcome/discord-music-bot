@@ -2,6 +2,8 @@ import os
 import calendar
 from dotenv import load_dotenv
 
+# REQUIRES RESTART OF BOT TO APPLY CHANGES
+
 load_dotenv()
 
 TOKEN = os.getenv('DISCORD_TOKEN')
