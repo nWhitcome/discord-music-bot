@@ -9,30 +9,19 @@ import sqlite3
 import random
 import calendar
 import datetime
+import config
 
 load_dotenv()
-TOKEN = os.getenv('DISCORD_TOKEN')
-suggChannel = '839962435044900874'
-testChannel = '840042019971661825'
 
-bot = Bot(command_prefix='$')
-
+bot = Bot(command_prefix=config.commandPrefix)
 
 bot.runOnceFlag = 0
 dictionary = {}
 
-# Config
-pollDay = os.getenv('POLL_DAY') or calendar.SUNDAY
-pollHour = os.getenv('POLL_HOUR') or 20
-pollMinute = os.getenv('POLL_MINUTE') or 0
-meetingDay = os.getenv('MEETING_DAY') or calendar.MONDAY
-meetingHour = os.getenv('MEETING_HOUR') or 20
-meetingMinute = os.getenv('MEETING_MINUTE') or 0
-
 # Gets the last meeting day of the month
 def getLastMeetingDay():
     now = datetime.datetime.now()
-    last_day = max(week[meetingDay]
+    last_day = max(week[config.meetingDay]
         for week in calendar.monthcalendar(now.year, now.month))
     return int(last_day)
 
@@ -62,8 +51,8 @@ def runOnce():
             dictionary[str(row[0])] = str(row[1])
 
         scheduler = AsyncIOScheduler()
-        scheduler.add_job(sendPoll, 'cron', day_of_week=pollDay, hour=pollHour, minute=pollMinute)
-        scheduler.add_job(chooseWinner, 'cron', day_of_week='tue', hour=meetingHour, minute=meetingMinute)
+        scheduler.add_job(sendPoll, 'cron', day_of_week=config.pollDay, hour=config.pollHour, minute=config.pollMinute)
+        scheduler.add_job(chooseWinner, 'cron', day_of_week='tue', hour=config.meetingHour, minute=config.meetingMinute)
         scheduler.start()
 
         bot.runOnceFlag = 1
@@ -93,7 +82,7 @@ async def sendPoll():
 @bot.command(name='suggest')
 async def suggest(ctx, *, arg):
     print("Received suggestion")
-    if(str(ctx.channel.id) == suggChannel or str(ctx.channel.id) == testChannel):
+    if(str(ctx.channel.id) == config.suggChannel or str(ctx.channel.id) == config.testChannel):
         dictionary[str(ctx.author)] = str(arg)
         conn = sqlite3.connect('weeklyData.db')
         c = conn.cursor()
@@ -106,7 +95,7 @@ async def suggest(ctx, *, arg):
 async def listSuggestions(ctx):
     print("Listing suggestions")
     listString = ""
-    if(str(ctx.channel.id) == suggChannel or str(ctx.channel.id) == testChannel):
+    if(str(ctx.channel.id) == config.suggChannel or str(ctx.channel.id) == config.testChannel):
         if(not dictionary):
             await ctx.send("No suggestions... yet")
         else:
@@ -117,19 +106,19 @@ async def listSuggestions(ctx):
 # Backup method that can only be called in the TestBot server that puts the album choice poll up in case it fails for some reason
 @bot.command(name='poll')
 async def poll(ctx):
-    if(str(ctx.channel.id) == testChannel):
+    if(str(ctx.channel.id) == config.testChannel):
         await sendPoll()
 
 # Backup method that can only be called in the TestBot server that chooses the winner
 @bot.command(name='choosethewinner')
 async def choosethewinner(ctx):
-    if(str(ctx.channel.id) == testChannel):
+    if(str(ctx.channel.id) == config.testChannel):
         chooseWinner()
 
 # Deletes your suggestion for the week
 @bot.command(name='delete')
 async def delete(ctx):
-    if(str(ctx.channel.id) == testChannel):
+    if(str(ctx.channel.id) == config.testChannel):
         print(ctx.author)
         conn = sqlite3.connect('weeklyData.db')
         c = conn.cursor()
@@ -163,7 +152,7 @@ async def chooseWinner():
                 if(int(datetime.datetime.now().day) + 7 == getLastMeetingDay()):
                     await channel.send("It's singles week! If you have a song you want everyone to hear during the meeting next week, use the suggest command with the name of the song and the artist before then!")
                 else:
-                    await channel.send("Suggestions are now open for the following week, so make sure to get them in by " + calendar.day_name[pollDay] + " at " + hourToPrintStandardTime(pollHour, pollMinute) + "!")
+                    await channel.send("Suggestions are now open for the following week, so make sure to get them in by " + calendar.day_name[config.pollDay] + " at " + hourToPrintStandardTime(config.pollHour, config.pollMinute) + "!")
                 break
     else:
         print("Listing singles week songs...")
@@ -187,4 +176,4 @@ async def chooseWinner():
 async def on_ready():
     runOnce()
 
-bot.run(TOKEN)
+bot.run(config.TOKEN)
