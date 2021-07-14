@@ -7,9 +7,9 @@ from dotenv import load_dotenv
 load_dotenv()
 
 TOKEN = os.getenv('DISCORD_TOKEN')
-suggChannel = '839962435044900874'
-announcementChannel = '839961783498571867'
-testChannel = '840042019971661825'
+suggChannel = os.getenv('SUGG_CHANNEL') or '839962435044900874'
+announcementChannel = os.getenv('ANNOUNCEMENT_CHANNEL') or '839961783498571867'
+testChannel = os.getenv('TEST_CHANNEL') or '840042019971661825'
 commandPrefix = '$'
 
 # Meeting date & time
