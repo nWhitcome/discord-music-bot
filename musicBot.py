@@ -1,6 +1,3 @@
-import os
-import discord
-from dotenv import load_dotenv
 from discord.ext.commands import Bot
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
@@ -10,8 +7,6 @@ import random
 import calendar
 import datetime
 import config
-
-load_dotenv()
 
 bot = Bot(command_prefix=config.commandPrefix)
 
