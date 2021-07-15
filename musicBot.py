@@ -1,7 +1,5 @@
 from discord.ext.commands import Bot
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from apscheduler.triggers.cron import CronTrigger
-from discord.ext import commands
 import sqlite3
 import random
 import calendar
