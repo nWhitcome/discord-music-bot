@@ -160,10 +160,13 @@ async def chooseWinner():
             dictionary.clear()
 
             # Deletes all of the previous week's suggestions
-            conn = sqlite3.connect('weeklyData.db')
-            c = conn.cursor()
-            c.execute('DELETE FROM weekly;')
-            conn.commit()
+            deleteSuggestions()
+
+def deleteSuggestions():
+    conn = sqlite3.connect('weeklyData.db')
+    c = conn.cursor()
+    c.execute('DELETE FROM weekly;')
+    conn.commit()
 
 @bot.event
 async def on_ready():
