@@ -44,10 +44,10 @@ def runOnce():
             dictionary[str(row[0])] = str(row[1])
 
         scheduler = AsyncIOScheduler()
-        scheduler.add_job(sendPoll, 'cron', day_of_week=config.pollDay, hour=config.pollHour, minute=config.pollMinute)
+        scheduler.add_job(sendPoll, 'cron', day_of_week=config.pollStartDay, hour=config.pollStartHour, minute=config.pollStartMinute)
         scheduler.add_job(chooseWinner, 'cron', day_of_week='tue', hour=config.meetingHour, minute=config.meetingMinute)
         scheduler.start()
-        print("Poll set for " + calendar.day_name[config.pollDay] + " " + hourToPrintStandardTime(config.pollHour, config.pollMinute))
+        print("Poll set for " + calendar.day_name[config.pollStartDay] + " " + hourToPrintStandardTime(config.pollStartHour, config.pollStartMinute))
         print("Meeting set for " + calendar.day_name[config.meetingDay] + " " + hourToPrintStandardTime(config.meetingHour, config.meetingMinute))
         bot.runOnceFlag = 1
 
@@ -146,7 +146,7 @@ async def chooseWinner():
                 if(int(datetime.datetime.now().day) + 7 == getLastMeetingDay()):
                     await channel.send("It's singles week! If you have a song you want everyone to hear during the meeting next week, use the suggest command with the name of the song and the artist before then!")
                 else:
-                    await channel.send("Suggestions are now open for the following week, so make sure to get them in by " + calendar.day_name[config.pollDay] + " at " + hourToPrintStandardTime(config.pollHour, config.pollMinute) + "!")
+                    await channel.send("Suggestions are now open for the following week, so make sure to get them in by " + calendar.day_name[config.pollStartDay] + " at " + hourToPrintStandardTime(config.pollStartHour, config.pollStartMinute) + "!")
                 break
     else:
         print("Listing singles week songs...")
