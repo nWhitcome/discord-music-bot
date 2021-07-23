@@ -121,6 +121,12 @@ async def delete(ctx):
         dictionary.pop(str(ctx.author))
         await ctx.message.add_reaction("👍")
 
+# Backup method that can only be called in the TestBot server that resets the suggests for the week
+@bot.command(name='deleteall')
+async def deleteall(ctx):
+    if(str(ctx.channel.id) == config.testChannel):
+        deleteSuggestions()
+
 # Chooses a winner from the album poll on the Covid Club server
 async def chooseWinner():
     channel = bot.get_channel(config.announcementChannel)
