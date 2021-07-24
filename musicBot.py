@@ -36,15 +36,13 @@ def hourToPrintStandardTime(hour, minute):
 
 def startup():
     setupWeeklyTable()
-    if(bot.runOnceFlag == 0):
-        print("Ready")
-        scheduler = AsyncIOScheduler()
-        scheduler.add_job(sendPoll, 'cron', day_of_week=config.pollDay, hour=config.pollHour, minute=config.pollMinute)
-        scheduler.add_job(chooseWinner, 'cron', day_of_week='tue', hour=config.meetingHour, minute=config.meetingMinute)
-        scheduler.start()
-        print("Poll set for " + calendar.day_name[config.pollDay] + " " + hourToPrintStandardTime(config.pollHour, config.pollMinute))
-        print("Meeting set for " + calendar.day_name[config.meetingDay] + " " + hourToPrintStandardTime(config.meetingHour, config.meetingMinute))
-        bot.runOnceFlag = 1
+    print("Ready")
+    scheduler = AsyncIOScheduler()
+    scheduler.add_job(sendPoll, 'cron', day_of_week=config.pollDay, hour=config.pollHour, minute=config.pollMinute)
+    scheduler.add_job(chooseWinner, 'cron', day_of_week='tue', hour=config.meetingHour, minute=config.meetingMinute)
+    scheduler.start()
+    print("Poll set for " + calendar.day_name[config.pollDay] + " " + hourToPrintStandardTime(config.pollHour, config.pollMinute))
+    print("Meeting set for " + calendar.day_name[config.meetingDay] + " " + hourToPrintStandardTime(config.meetingHour, config.meetingMinute))
 
 def setupWeeklyTable():
     conn = sqlite3.connect('weeklyData.db')
