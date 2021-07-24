@@ -8,8 +8,13 @@ import config
 
 bot = Bot(command_prefix=config.commandPrefix)
 
-bot.runOnceFlag = 0
-dictionary = {}
+def getCurrentSuggestions():
+    suggestions = {}
+    c = sqlite3.connect('weeklyData.db').cursor()
+    c.execute('SELECT * FROM weekly;')
+    for row in c.fetchall():
+        suggestions[str(row[0])] = str(row[1])
+    return suggestions
 
 # Gets the last meeting day of the month
 def getLastMeetingDay():
@@ -29,20 +34,10 @@ def hourToPrintStandardTime(hour, minute):
         printableAmPm = 'PM'
     return str(printableHour) + ':' + str(minute).zfill(2) + ' ' + str(printableAmPm) + ' CST'
 
-def runOnce():
+def startup():
+    setupWeeklyTable()
     if(bot.runOnceFlag == 0):
         print("Ready")
-        conn = sqlite3.connect('weeklyData.db')
-        makeTable = 'CREATE TABLE IF NOT EXISTS weekly (id text PRIMARY KEY, content text NOT NULL); '
-
-        c = conn.cursor()
-        c.execute(makeTable)
-        c.execute('SELECT * FROM weekly;')
-
-        rows = c.fetchall()
-        for row in rows:
-            dictionary[str(row[0])] = str(row[1])
-
         scheduler = AsyncIOScheduler()
         scheduler.add_job(sendPoll, 'cron', day_of_week=config.pollDay, hour=config.pollHour, minute=config.pollMinute)
         scheduler.add_job(chooseWinner, 'cron', day_of_week='tue', hour=config.meetingHour, minute=config.meetingMinute)
@@ -50,6 +45,12 @@ def runOnce():
         print("Poll set for " + calendar.day_name[config.pollDay] + " " + hourToPrintStandardTime(config.pollHour, config.pollMinute))
         print("Meeting set for " + calendar.day_name[config.meetingDay] + " " + hourToPrintStandardTime(config.meetingHour, config.meetingMinute))
         bot.runOnceFlag = 1
+
+def setupWeeklyTable():
+    conn = sqlite3.connect('weeklyData.db')
+    makeTable = 'CREATE TABLE IF NOT EXISTS weekly (id text PRIMARY KEY, content text NOT NULL); '
+    c = conn.cursor()
+    c.execute(makeTable)
 
 # Sends out a poll so people can vote on album of the week
 async def sendPoll():
@@ -64,7 +65,7 @@ async def sendPoll():
             if message.author == bot.user:
                 await message.delete()
                 break
-        dictionary.clear()
+        dictionary.clear() # TODO: fix
 
         # Deletes all of the previous week's suggestions
         conn = sqlite3.connect('weeklyData.db')
@@ -167,6 +168,6 @@ async def chooseWinner():
 
 @bot.event
 async def on_ready():
-    runOnce()
+    startup()
 
 bot.run(config.TOKEN)
