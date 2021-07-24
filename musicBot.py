@@ -58,20 +58,14 @@ async def sendPoll():
         print("Posting poll...")
         channel = bot.get_channel(config.announcementChannel)
         pollString = '/poll "<@&839958672868245504>, here is the poll for the album of the week:"'
-        for i, j in dictionary.items():
+        for i, j in getCurrentSuggestions().items():
             pollString += f' "{i} - {j}"'
         await channel.send(pollString)
         async for message in channel.history(limit = 10):
             if message.author == bot.user:
                 await message.delete()
                 break
-        dictionary.clear() # TODO: fix
-
-        # Deletes all of the previous week's suggestions
-        conn = sqlite3.connect('weeklyData.db')
-        c = conn.cursor()
-        c.execute('DELETE FROM weekly;')
-        conn.commit()
+        deleteAllSuggestions()
 
 # Allows users to submit a suggestion for album of the week, which is then stored in a database
 @bot.command(name='suggest')
@@ -159,13 +153,13 @@ async def chooseWinner():
             for k, v in suggestions.items():
                 listString += f'{k} - {v}\n'
             await channel.send(listString)
-            dictionary.clear() #TODO: Fix
+            deleteAllSuggestions()
 
-            # Deletes all of the previous week's suggestions
-            conn = sqlite3.connect('weeklyData.db')
-            c = conn.cursor()
-            c.execute('DELETE FROM weekly;')
-            conn.commit()
+def deleteAllSuggestions():
+    conn = sqlite3.connect('weeklyData.db')
+    c = conn.cursor()
+    c.execute('DELETE FROM weekly;')
+    conn.commit()
 
 @bot.event
 async def on_ready():
