@@ -7,15 +7,15 @@ from dotenv import load_dotenv
 load_dotenv()
 
 TOKEN = os.getenv('DISCORD_TOKEN')
-suggChannel = os.getenv('SUGG_CHANNEL') or '839962435044900874'
-announcementChannel = os.getenv('ANNOUNCEMENT_CHANNEL') or '839961783498571867'
-testChannel = os.getenv('TEST_CHANNEL') or '840042019971661825'
+suggChannel = os.getenv('SUGG_CHANNEL', '839962435044900874')
+announcementChannel = os.getenv('ANNOUNCEMENT_CHANNEL', '839961783498571867')
+testChannel = os.getenv('TEST_CHANNEL','840042019971661825')
 commandPrefix = '$'
 
 # Meeting date & time
-pollDay = os.getenv('POLL_DAY') or calendar.SUNDAY
-pollHour = os.getenv('POLL_HOUR') or 20
-pollMinute = os.getenv('POLL_MINUTE') or 0
-meetingDay = os.getenv('MEETING_DAY') or calendar.MONDAY
-meetingHour = os.getenv('MEETING_HOUR') or 20
-meetingMinute = os.getenv('MEETING_MINUTE') or 0
+pollDay = int(os.getenv('POLL_DAY', calendar.SUNDAY))
+pollHour = int(os.getenv('POLL_HOUR', 20))
+pollMinute = int(os.getenv('POLL_MINUTE', 0))
+meetingDay = int(os.getenv('MEETING_DAY', calendar.MONDAY))
+meetingHour = int(os.getenv('MEETING_HOUR', 20))
+meetingMinute = int(os.getenv('MEETING_MINUTE', 0))
