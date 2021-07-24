@@ -78,7 +78,7 @@ async def sendPoll():
 async def suggest(ctx, *, arg):
     print("Received suggestion")
     if(str(ctx.channel.id) == config.suggChannel or str(ctx.channel.id) == config.testChannel):
-        dictionary[str(ctx.author)] = str(arg)
+        getCurrentSuggestions()[str(ctx.author)] = str(arg)
         conn = sqlite3.connect('weeklyData.db')
         c = conn.cursor()
         c.execute('INSERT OR REPLACE INTO weekly(id, content) VALUES(?,?);', (str(ctx.author), str(arg)))
@@ -91,10 +91,11 @@ async def listSuggestions(ctx):
     print("Listing suggestions")
     listString = ""
     if(str(ctx.channel.id) == config.suggChannel or str(ctx.channel.id) == config.testChannel):
-        if(not dictionary):
+        suggestions = getCurrentSuggestions();
+        if(not suggestions):
             await ctx.send("No suggestions... yet")
         else:
-            for k, v in dictionary.items():
+            for k, v in suggestions.items():
                 listString += f'{k} - {v}\n'
             await ctx.send(listString)
 
@@ -119,7 +120,6 @@ async def delete(ctx):
         c = conn.cursor()
         c.execute("DELETE FROM weekly WHERE id = ?;", (str(ctx.author), ))
         conn.commit()
-        dictionary.pop(str(ctx.author))
         await ctx.message.add_reaction("👍")
 
 # Chooses a winner from the album poll on the Covid Club server
@@ -151,14 +151,15 @@ async def chooseWinner():
                 break
     else:
         print("Listing singles week songs...")
-        if(not dictionary):
+        suggestions = getCurrentSuggestions()
+        if(not suggestions):
             await channel.send("No suggestions :(")
         else:
             listString = "Here are the songs for singles week: \n"
-            for k, v in dictionary.items():
+            for k, v in suggestions.items():
                 listString += f'{k} - {v}\n'
             await channel.send(listString)
-            dictionary.clear()
+            dictionary.clear() #TODO: Fix
 
             # Deletes all of the previous week's suggestions
             conn = sqlite3.connect('weeklyData.db')
