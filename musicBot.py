@@ -84,11 +84,6 @@ async def suggest(ctx, *, arg):
         conn.commit()
         await ctx.message.add_reaction("👍")
 
-        # Allows users to submit a suggestion for album of the week, which is then stored in a database
-@bot.command(name='sendpollcommand')
-async def sendPollCommand(ctx):
-    await sendPoll()
-
 # Lists all of the album choices that have been submitted
 @bot.command(name='list')
 async def listSuggestions(ctx):
