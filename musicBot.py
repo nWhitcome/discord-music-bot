@@ -182,7 +182,7 @@ async def delete(ctx):
         print(ctx.author)
         conn = sqlite3.connect('weeklyData.db')
         c = conn.cursor()
-        c.execute("DELETE FROM weekly WHERE id = ?;", (str(ctx.author), ))
+        c.execute("DELETE FROM weekly WHERE id = ?;", (str(ctx.author)))
         conn.commit()
         dictionary.pop(str(ctx.author))
         await ctx.message.add_reaction("👍")
