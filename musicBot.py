@@ -10,6 +10,7 @@ bot = Bot(command_prefix=config.commandPrefix)
 
 bot.runOnceFlag = 0
 dictionary = {}
+dictionaryMovie = {}
 
 # Gets the last meeting day of the month
 def getLastMeetingDay():
@@ -29,26 +30,40 @@ def hourToPrintStandardTime(hour, minute):
         printableAmPm = 'PM'
     return str(printableHour) + ':' + str(minute).zfill(2) + ' ' + str(printableAmPm) + ' CST'
 
+# Code content that is run once when the bot is started up. For example: cron job declarations and selecting data from a database
 def runOnce():
     if(bot.runOnceFlag == 0):
         print("Ready")
         conn = sqlite3.connect('weeklyData.db')
         makeTable = 'CREATE TABLE IF NOT EXISTS weekly (id text PRIMARY KEY, content text NOT NULL); '
+        makeTableMovies = 'CREATE TABLE IF NOT EXISTS weeklyMovie (id text PRIMARY KEY, content text NOT NULL); '
 
         c = conn.cursor()
         c.execute(makeTable)
+        c.execute(makeTableMovies)
         c.execute('SELECT * FROM weekly;')
 
         rows = c.fetchall()
         for row in rows:
             dictionary[str(row[0])] = str(row[1])
+        
+        c.execute('SELECT * FROM weeklyMovie;')
+        rows = c.fetchall()
+        for row in rows:
+            dictionaryMovie[str(row[0])] = str(row[1])
 
         scheduler = AsyncIOScheduler()
         scheduler.add_job(sendPoll, 'cron', day_of_week=config.pollDay, hour=config.pollHour, minute=config.pollMinute)
+        scheduler.add_job(sendPollMovie, 'cron', day_of_week=config.pollDayMovie, hour=config.pollHourMovie, minute=config.pollMinuteMovie)
+        scheduler.add_job(sendReminder, 'cron', day_of_week=config.pollDay, hour=config.reminderHour, minute=config.reminderMinute)
+        scheduler.add_job(sendReminderMovie, 'cron', day_of_week=config.pollDay, hour=config.reminderHour, minute=config.reminderMinute)
         scheduler.add_job(chooseWinner, 'cron', day_of_week=config.meetingDay, hour=config.meetingHour, minute=config.meetingMinute)
+        scheduler.add_job(chooseWinnerMovie, 'cron', day_of_week=config.meetingDayMovie, hour=config.meetingHourMovie, minute=config.meetingMinuteMovie)
         scheduler.start()
-        print("Poll set for " + calendar.day_name[config.pollDay] + " " + hourToPrintStandardTime(config.pollHour, config.pollMinute))
-        print("Meeting set for " + calendar.day_name[config.meetingDay] + " " + hourToPrintStandardTime(config.meetingHour, config.meetingMinute))
+        print("Music poll set for " + calendar.day_name[config.pollDay] + " " + hourToPrintStandardTime(config.pollHour, config.pollMinute))
+        print("Music meeting set for " + calendar.day_name[config.meetingDay] + " " + hourToPrintStandardTime(config.meetingHour, config.meetingMinute))
+        print("Movie poll set for " + calendar.day_name[config.pollDayMovie] + " " + hourToPrintStandardTime(config.pollHourMovie, config.pollMinuteMovie))
+        print("Movie meeting set for " + calendar.day_name[config.meetingDayMovie] + " " + hourToPrintStandardTime(config.meetingHourMovie, config.meetingMinuteMovie))
         bot.runOnceFlag = 1
 
 # Sends out a poll so people can vote on album of the week
@@ -56,7 +71,7 @@ async def sendPoll():
     if(int(datetime.datetime.now().day) + 1 != getLastMeetingDay()):
         print("Posting poll...")
         channel = bot.get_channel(config.announcementChannel)
-        pollString = '/poll "<@&839958672868245504>, here is the poll for the album of the week:"'
+        pollString = '/poll "' + config.musicId + ', here is the poll for the album of the week:"'
         for i, j in dictionary.items():
             pollString += f' "{i} - {j}"'
         await channel.send(pollString)
@@ -72,6 +87,38 @@ async def sendPoll():
         c.execute('DELETE FROM weekly;')
         conn.commit()
 
+# Sends out a poll so people can vote on the movie of the week
+async def sendPollMovie():
+    print("Posting poll...")
+    channel = bot.get_channel(config.announcementChannelMovie)
+    pollString = '/poll "' + config.movieId + ', here is the poll for the movie of the week:"'
+    for i, j in dictionaryMovie.items():
+        pollString += f' "{i} - {j}"'
+    await channel.send(pollString)
+    async for message in channel.history(limit = 10):
+        if message.author == bot.user:
+            await message.delete()
+            break
+    dictionaryMovie.clear()
+
+    # Deletes all of the previous week's suggestions
+    conn = sqlite3.connect('weeklyData.db')
+    c = conn.cursor()
+    c.execute('DELETE FROM weeklyMovie;')
+    conn.commit()
+
+# Sends out a reminder for the music meeting 30 minutes before
+async def sendReminder():
+        channel = bot.get_channel(config.announcementChannel)
+        pollString = '"' + config.musicId + ', the meeting for this week is starting in 30 minutes!"'
+        await channel.send(pollString)
+
+# Sends out a reminder for the music meeting 30 minutes before
+async def sendReminderMovie():
+        channel = bot.get_channel(config.announcementChannelMovie)
+        pollString = '"' + config.movieId + ', voting for this week ends in 30 minutes!"'
+        await channel.send(pollString)
+
 # Allows users to submit a suggestion for album of the week, which is then stored in a database
 @bot.command(name='suggest')
 async def suggest(ctx, *, arg):
@@ -84,6 +131,17 @@ async def suggest(ctx, *, arg):
         conn.commit()
         await ctx.message.add_reaction("👍")
 
+    elif(str(ctx.channel.id) == config.suggChannelMovie or str(ctx.channel.id) == config.testChannelMovie):
+        dictionaryMovie[str(ctx.author)] = str(arg)
+        conn = sqlite3.connect('weeklyData.db')
+        c = conn.cursor()
+        c.execute('INSERT OR REPLACE INTO weeklyMovie(id, content) VALUES(?,?);', (str(ctx.author), str(arg)))
+        conn.commit()
+        await ctx.message.add_reaction("👍")
+
+    else:
+        print("Err: couldn't take suggestion")
+
 # Lists all of the album choices that have been submitted
 @bot.command(name='list')
 async def listSuggestions(ctx):
@@ -94,6 +152,14 @@ async def listSuggestions(ctx):
             await ctx.send("No suggestions... yet")
         else:
             for k, v in dictionary.items():
+                listString += f'{k} - {v}\n'
+            await ctx.send(listString)
+
+    elif(str(ctx.channel.id) == config.suggChannelMovie or str(ctx.channel.id) == config.testChannelMovie):
+        if(not dictionaryMovie):
+            await ctx.send("No suggestions... yet")
+        else:
+            for k, v in dictionaryMovie.items():
                 listString += f'{k} - {v}\n'
             await ctx.send(listString)
 
@@ -112,13 +178,22 @@ async def choosethewinner(ctx):
 # Deletes your suggestion for the week
 @bot.command(name='delete')
 async def delete(ctx):
-    if(str(ctx.channel.id) == config.testChannel):
+    if(str(ctx.channel.id) == config.suggChannel):
         print(ctx.author)
         conn = sqlite3.connect('weeklyData.db')
         c = conn.cursor()
-        c.execute("DELETE FROM weekly WHERE id = ?;", (str(ctx.author), ))
+        c.execute("DELETE FROM weekly WHERE id = ?;", (str(ctx.author)))
         conn.commit()
         dictionary.pop(str(ctx.author))
+        await ctx.message.add_reaction("👍")
+
+    elif(str(ctx.channel.id) == config.suggChannelMovie):
+        print(ctx.author)
+        conn = sqlite3.connect('weeklyData.db')
+        c = conn.cursor()
+        c.execute("DELETE FROM weeklyMovie WHERE id = ?;", (str(ctx.author)))
+        conn.commit()
+        dictionaryMovie.pop(str(ctx.author))
         await ctx.message.add_reaction("👍")
 
 # Chooses a winner from the album poll on the Covid Club server
@@ -139,7 +214,7 @@ async def chooseWinner():
                     elif message.reactions[i].count == max:
                         index.append(i)
                     i = i+1
-                await channel.send('<@&839958672868245504> And the winning album for the week is:')
+                await channel.send(config.musicId + 'And the winning album for the week is:')
 
                 # Breaks ties with the random function
                 await channel.send(message.embeds[0].description.split("\n")[random.choice(index)])
@@ -164,6 +239,30 @@ async def chooseWinner():
             c = conn.cursor()
             c.execute('DELETE FROM weekly;')
             conn.commit()
+
+# Chooses a winner from the album poll on the Covid Club server
+async def chooseWinnerMovie():
+    channel = bot.get_channel(config.announcementChannelMovie)
+
+    # Finds the last poll posted in the movie announcements channel and gets the winner. Myself and the admins are the only ones that can post in that channel.
+    async for message in channel.history(limit = 10):
+        if message.author.id == 324631108731928587:
+            max = 0
+            index = []
+            i = 0
+            while i <  len(message.reactions):
+                if(int(message.reactions[i].count) > max):
+                    max = message.reactions[i].count
+                    index = [i]
+                elif message.reactions[i].count == max:
+                    index.append(i)
+                i = i+1
+            await channel.send(config.musicId + 'And the winning movie for the week is:')
+
+            # Breaks ties with the random function
+            await channel.send(message.embeds[0].description.split("\n")[random.choice(index)])
+            await channel.send("Suggestions are now open for the following week, so make sure to get them in by " + calendar.day_name[config.pollDayMovie] + " at " + hourToPrintStandardTime(config.pollHourMovie, config.pollMinuteMovie) + "!")
+            break
 
 @bot.event
 async def on_ready():
