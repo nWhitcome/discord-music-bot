@@ -178,7 +178,7 @@ async def choosethewinner(ctx):
 # Deletes your suggestion for the week
 @bot.command(name='delete')
 async def delete(ctx):
-    if(str(ctx.channel.id) == config.suggChannel):
+    if(str(ctx.channel.id) == config.suggChannel or str(ctx.channel.id) == config.testChannel):
         print(ctx.author)
         conn = sqlite3.connect('weeklyData.db')
         c = conn.cursor()
@@ -187,11 +187,11 @@ async def delete(ctx):
         dictionary.pop(str(ctx.author))
         await ctx.message.add_reaction("👍")
 
-    elif(str(ctx.channel.id) == config.suggChannelMovie):
+    elif(str(ctx.channel.id) == config.suggChannelMovie or str(ctx.channel.id) == config.testChannelMovie):
         print(ctx.author)
         conn = sqlite3.connect('weeklyData.db')
         c = conn.cursor()
-        c.execute("DELETE FROM weeklyMovie WHERE id = ?;", (str(ctx.author)))
+        c.execute("DELETE FROM weeklyMovie WHERE id = ?;", (str(ctx.author), ))
         conn.commit()
         dictionaryMovie.pop(str(ctx.author))
         await ctx.message.add_reaction("👍")
