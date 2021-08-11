@@ -175,6 +175,12 @@ async def choosethewinner(ctx):
     if(str(ctx.channel.id) == config.testChannel):
         chooseWinner()
 
+# Backup method that can only be called in the TestBot server that chooses the winner
+@bot.command(name='choosethewinnermovie')
+async def choosethewinnermovie(ctx):
+    if(str(ctx.channel.id) == config.testChannel):
+        chooseWinnerMovie()
+
 # Deletes your suggestion for the week
 @bot.command(name='delete')
 async def delete(ctx):
