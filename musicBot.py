@@ -70,7 +70,7 @@ def runOnce():
 async def sendPoll():
     if(int(datetime.datetime.now().day) + 1 != getLastMeetingDay()):
         print("Posting poll...")
-        channel = bot.get_channel(config.announcementChannel)
+        channel = bot.get_channel(int(config.announcementChannel))
         pollString = '/poll "' + config.musicId + ', here is the poll for the album of the week:"'
         for i, j in dictionary.items():
             pollString += f' "{i} - {j}"'
@@ -90,7 +90,7 @@ async def sendPoll():
 # Sends out a poll so people can vote on the movie of the week
 async def sendPollMovie():
     print("Posting poll...")
-    channel = bot.get_channel(config.announcementChannelMovie)
+    channel = bot.get_channel(int(config.announcementChannelMovie))
     pollString = '/poll "' + config.movieId + ', here is the poll for the movie of the week:"'
     for i, j in dictionaryMovie.items():
         pollString += f' "{i} - {j}"'
@@ -109,13 +109,13 @@ async def sendPollMovie():
 
 # Sends out a reminder for the music meeting 30 minutes before
 async def sendReminder():
-        channel = bot.get_channel(config.announcementChannel)
+        channel = bot.get_channel(int(config.announcementChannel))
         pollString = '"' + config.musicId + ', the meeting for this week is starting in 30 minutes!"'
         await channel.send(pollString)
 
 # Sends out a reminder for the music meeting 30 minutes before
 async def sendReminderMovie():
-        channel = bot.get_channel(config.announcementChannelMovie)
+        channel = bot.get_channel(int(config.announcementChannelMovie))
         pollString = '"' + config.movieId + ', voting for this week ends in 30 minutes!"'
         await channel.send(pollString)
 
@@ -204,7 +204,7 @@ async def delete(ctx):
 
 # Chooses a winner from the album poll on the Covid Club server
 async def chooseWinner():
-    channel = bot.get_channel(config.announcementChannel)
+    channel = bot.get_channel(int(config.announcementChannel))
 
     if(int(datetime.datetime.now().day) != getLastMeetingDay()):
         # Finds the last poll posted in the music announcements channel and gets the winner. Myself and the admins are the only ones that can post in that channel.
@@ -248,8 +248,7 @@ async def chooseWinner():
 
 # Chooses a winner from the album poll on the Covid Club server
 async def chooseWinnerMovie():
-    channel = bot.get_channel(config.announcementChannelMovie)
-
+    channel = bot.get_channel(int(config.announcementChannelMovie))
     # Finds the last poll posted in the movie announcements channel and gets the winner. Myself and the admins are the only ones that can post in that channel.
     async for message in channel.history(limit = 10):
         if message.author.id == 324631108731928587:
