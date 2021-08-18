@@ -169,6 +169,12 @@ async def poll(ctx):
     if(str(ctx.channel.id) == config.testChannel):
         await sendPoll()
 
+# Backup method that can only be called in the TestBot server that puts the album choice poll up in case it fails for some reason
+@bot.command(name='pollMovie')
+async def pollmovie(ctx):
+    if(str(ctx.channel.id) == config.testChannelMovie):
+        await sendPollMovie()
+
 # Backup method that can only be called in the TestBot server that chooses the winner
 @bot.command(name='choosethewinner')
 async def choosethewinner(ctx):
@@ -178,7 +184,7 @@ async def choosethewinner(ctx):
 # Backup method that can only be called in the TestBot server that chooses the winner
 @bot.command(name='choosethewinnermovie')
 async def choosethewinnermovie(ctx):
-    if(str(ctx.channel.id) == config.testChannel):
+    if(str(ctx.channel.id) == config.testChannelMovie):
         await chooseWinnerMovie()
 
 # Deletes your suggestion for the week
