@@ -64,7 +64,7 @@ def runOnce():
         print("Music reminder set for " + calendar.day_name[config.meetingDay] + " " + hourToPrintStandardTime(config.reminderHour, config.reminderMinute))
         print("Music meeting set for " + calendar.day_name[config.meetingDay] + " " + hourToPrintStandardTime(config.meetingHour, config.meetingMinute))
         print("Movie poll set for " + calendar.day_name[config.pollDayMovie] + " " + hourToPrintStandardTime(config.pollHourMovie, config.pollMinuteMovie))
-        print("Movie reminder set for " + calendar.day_name[config.meetingDayMovie] + " " + hourToPrintStandardTime(config.reminderHourMovie, config.reminderMinuteMovie))
+        print("Movie reminder set for " + calendar.day_name[config.pollDayMovie] + " " + hourToPrintStandardTime(config.reminderHourMovie, config.reminderMinuteMovie))
         print("Movie meeting set for " + calendar.day_name[config.meetingDayMovie] + " " + hourToPrintStandardTime(config.meetingHourMovie, config.meetingMinuteMovie))
         bot.runOnceFlag = 1
 
