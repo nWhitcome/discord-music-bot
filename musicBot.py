@@ -55,14 +55,16 @@ def runOnce():
         scheduler = AsyncIOScheduler()
         scheduler.add_job(sendPoll, 'cron', day_of_week=config.pollDay, hour=config.pollHour, minute=config.pollMinute)
         scheduler.add_job(sendPollMovie, 'cron', day_of_week=config.pollDayMovie, hour=config.pollHourMovie, minute=config.pollMinuteMovie)
-        scheduler.add_job(sendReminder, 'cron', day_of_week=config.pollDay, hour=config.reminderHour, minute=config.reminderMinute)
-        scheduler.add_job(sendReminderMovie, 'cron', day_of_week=config.pollDay, hour=config.reminderHour, minute=config.reminderMinute)
+        scheduler.add_job(sendReminder, 'cron', day_of_week=config.meetingDay, hour=config.reminderHour, minute=config.reminderMinute)
+        scheduler.add_job(sendReminderMovie, 'cron', day_of_week=config.meetingDayMovie, hour=config.reminderHourMovie, minute=config.reminderMinuteMovie)
         scheduler.add_job(chooseWinner, 'cron', day_of_week=config.meetingDay, hour=config.meetingHour, minute=config.meetingMinute)
         scheduler.add_job(chooseWinnerMovie, 'cron', day_of_week=config.meetingDayMovie, hour=config.meetingHourMovie, minute=config.meetingMinuteMovie)
         scheduler.start()
         print("Music poll set for " + calendar.day_name[config.pollDay] + " " + hourToPrintStandardTime(config.pollHour, config.pollMinute))
+        print("Music reminder set for " + calendar.day_name[config.meetingDay] + " " + hourToPrintStandardTime(config.reminderHour, config.reminderMinute))
         print("Music meeting set for " + calendar.day_name[config.meetingDay] + " " + hourToPrintStandardTime(config.meetingHour, config.meetingMinute))
         print("Movie poll set for " + calendar.day_name[config.pollDayMovie] + " " + hourToPrintStandardTime(config.pollHourMovie, config.pollMinuteMovie))
+        print("Movie reminder set for " + calendar.day_name[config.meetingDayMovie] + " " + hourToPrintStandardTime(config.reminderHourMovie, config.reminderMinuteMovie))
         print("Movie meeting set for " + calendar.day_name[config.meetingDayMovie] + " " + hourToPrintStandardTime(config.meetingHourMovie, config.meetingMinuteMovie))
         bot.runOnceFlag = 1
 
@@ -110,13 +112,13 @@ async def sendPollMovie():
 # Sends out a reminder for the music meeting 30 minutes before
 async def sendReminder():
         channel = bot.get_channel(int(config.announcementChannel))
-        pollString = '"' + config.musicId + ', the meeting for this week is starting in 30 minutes!"'
+        pollString = config.musicId + ', the meeting for this week is starting in 30 minutes!'
         await channel.send(pollString)
 
 # Sends out a reminder for the music meeting 30 minutes before
 async def sendReminderMovie():
         channel = bot.get_channel(int(config.announcementChannelMovie))
-        pollString = '"' + config.movieId + ', voting for this week ends in 30 minutes!"'
+        pollString = config.movieId + ', voting for this week ends in 30 minutes!'
         await channel.send(pollString)
 
 # Allows users to submit a suggestion for album of the week, which is then stored in a database
