@@ -16,7 +16,7 @@ testChannelMovie = os.getenv('TEST_CHANNEL_MOVIE','874768828867960902')
 commandPrefix = '$'
 
 # Meeting date & time for the music club
-musicId = "<@&877240128018464870>"
+musicId = "<@&839958672868245504>"
 pollDay = int(os.getenv('POLL_DAY', calendar.SUNDAY))
 pollHour = int(os.getenv('POLL_HOUR', 20))
 pollMinute = int(os.getenv('POLL_MINUTE', 0))
