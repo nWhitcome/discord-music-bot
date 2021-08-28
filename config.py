@@ -17,14 +17,14 @@ commandPrefix = '$'
 
 # Meeting date & time for the music club
 musicId = "<@&839958672868245504>"
-pollDay = int(os.getenv('POLL_DAY', calendar.SUNDAY))
+pollDay = int(os.getenv('POLL_DAY', calendar.MONDAY))
 pollHour = int(os.getenv('POLL_HOUR', 20))
 pollMinute = int(os.getenv('POLL_MINUTE', 0))
-meetingDay = int(os.getenv('MEETING_DAY', calendar.MONDAY))
+meetingDay = int(os.getenv('MEETING_DAY', calendar.TUESDAY))
 meetingHour = int(os.getenv('MEETING_HOUR', 20))
-meetingMinute = int(os.getenv('MEETING_MINUTE', 0))
-reminderHour = int(os.getenv('MEETING_HOUR', 19))
-reminderMinute = int(os.getenv('MEETING_MINUTE', 30))
+meetingMinute = int(os.getenv('MEETING_MINUTE', 30))
+reminderHour = int(os.getenv('MEETING_HOUR', 20))
+reminderMinute = int(os.getenv('MEETING_MINUTE', 0))
 
 # Meeting date & time for the movie club
 movieId = "<@&872896127882633268>"

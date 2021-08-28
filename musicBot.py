@@ -97,10 +97,10 @@ async def sendPollMovie():
     for i, j in dictionaryMovie.items():
         pollString += f' "{i} - {j}"'
     await channel.send(pollString)
-    async for message in channel.history(limit = 10):
-        if message.author == bot.user:
-            await message.delete()
-            break
+    #async for message in channel.history(limit = 10):
+    #    if message.author == bot.user:
+    #        await message.delete()
+    #        break
     dictionaryMovie.clear()
 
     # Deletes all of the previous week's suggestions
@@ -118,7 +118,7 @@ async def sendReminder():
 # Sends out a reminder for the music meeting 30 minutes before
 async def sendReminderMovie():
         channel = bot.get_channel(int(config.announcementChannelMovie))
-        pollString = config.movieId + ', voting for this week ends in 30 minutes!'
+        pollString = config.movieId + ', voting for this week starts in 30 minutes! Last chance to get your suggestions in!'
         await channel.send(pollString)
 
 # Allows users to submit a suggestion for album of the week, which is then stored in a database
@@ -126,18 +126,18 @@ async def sendReminderMovie():
 async def suggest(ctx, *, arg):
     print("Received suggestion")
     if(str(ctx.channel.id) == config.suggChannel or str(ctx.channel.id) == config.testChannel):
-        dictionary[str(ctx.author)] = str(arg)
+        dictionary[str(ctx.author)] = str(arg[:256])
         conn = sqlite3.connect('weeklyData.db')
         c = conn.cursor()
-        c.execute('INSERT OR REPLACE INTO weekly(id, content) VALUES(?,?);', (str(ctx.author), str(arg)))
+        c.execute('INSERT OR REPLACE INTO weekly(id, content) VALUES(?,?);', (str(ctx.author), str(arg[:256])))
         conn.commit()
         await ctx.message.add_reaction("👍")
 
     elif(str(ctx.channel.id) == config.suggChannelMovie or str(ctx.channel.id) == config.testChannelMovie):
-        dictionaryMovie[str(ctx.author)] = str(arg)
+        dictionaryMovie[str(ctx.author)] = str(arg[:256])
         conn = sqlite3.connect('weeklyData.db')
         c = conn.cursor()
-        c.execute('INSERT OR REPLACE INTO weeklyMovie(id, content) VALUES(?,?);', (str(ctx.author), str(arg)))
+        c.execute('INSERT OR REPLACE INTO weeklyMovie(id, content) VALUES(?,?);', (str(ctx.author), str(arg[:256])))
         conn.commit()
         await ctx.message.add_reaction("👍")
 
@@ -193,7 +193,6 @@ async def choosethewinnermovie(ctx):
 @bot.command(name='delete')
 async def delete(ctx):
     if(str(ctx.channel.id) == config.suggChannel or str(ctx.channel.id) == config.testChannel):
-        print(ctx.author)
         conn = sqlite3.connect('weeklyData.db')
         c = conn.cursor()
         c.execute("DELETE FROM weekly WHERE id = ?;", (str(ctx.author)))
@@ -202,7 +201,6 @@ async def delete(ctx):
         await ctx.message.add_reaction("👍")
 
     elif(str(ctx.channel.id) == config.suggChannelMovie or str(ctx.channel.id) == config.testChannelMovie):
-        print(ctx.author)
         conn = sqlite3.connect('weeklyData.db')
         c = conn.cursor()
         c.execute("DELETE FROM weeklyMovie WHERE id = ?;", (str(ctx.author), ))
@@ -270,7 +268,7 @@ async def chooseWinnerMovie():
                 elif message.reactions[i].count == max:
                     index.append(i)
                 i = i+1
-            await channel.send(config.musicId + 'And the winning movie for the week is:')
+            await channel.send(config.movieId + 'And the winning movie for the week is:')
 
             # Breaks ties with the random function
             await channel.send(message.embeds[0].description.split("\n")[random.choice(index)])
