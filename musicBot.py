@@ -1,4 +1,5 @@
 from discord.ext.commands import Bot
+from discord.utils import get
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 import sqlite3
 import random
@@ -278,5 +279,13 @@ async def chooseWinnerMovie():
 @bot.event
 async def on_ready():
     runOnce()
+
+@bot.event
+async def on_message(message):
+    if message.channel.id == 890462319384100914:
+        role = get(message.guild.roles, id=889740023950376971)
+        if not role in message.author.roles:
+            print("Gave member role to {0}".format(message.author))
+            await message.author.add_roles(role)
 
 bot.run(config.TOKEN)

@@ -36,3 +36,6 @@ meetingHourMovie = int(os.getenv('MEETING_HOUR_MOVIE', 22))
 meetingMinuteMovie = int(os.getenv('MEETING_MINUTE_MOVIE', 0))
 reminderHourMovie = int(os.getenv('MEETING_HOUR', 11))
 reminderMinuteMovie = int(os.getenv('MEETING_MINUTE', 30))
+
+# Introduction channel checking
+introId = "<@&889728792887709706>"
