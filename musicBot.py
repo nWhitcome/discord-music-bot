@@ -13,6 +13,8 @@ bot.runOnceFlag = 0
 dictionary = {}
 dictionaryMovie = {}
 
+
+
 # Gets the last meeting day of the month
 def getLastMeetingDay():
     now = datetime.datetime.now()
@@ -280,6 +282,7 @@ async def chooseWinnerMovie():
 async def on_ready():
     runOnce()
 
+#Checks if the user posted in the introductions channel and gives them member permission
 @bot.event
 async def on_message(message):
     if message.channel.id == 890462319384100914:
@@ -287,5 +290,6 @@ async def on_message(message):
         if not role in message.author.roles:
             print("Gave member role to {0}".format(message.author))
             await message.author.add_roles(role)
+    await bot.process_commands(message)
 
 bot.run(config.TOKEN)
