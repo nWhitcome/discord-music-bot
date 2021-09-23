@@ -282,6 +282,7 @@ async def chooseWinnerMovie():
 async def on_ready():
     runOnce()
 
+
 #Checks if the user posted in the introductions channel and gives them member permission
 @bot.event
 async def on_message(message):
