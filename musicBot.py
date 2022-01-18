@@ -13,6 +13,8 @@ bot.runOnceFlag = 0
 dictionary = {}
 dictionaryMovie = {}
 
+
+
 # Gets the last meeting day of the month
 def getLastMeetingDay():
     now = datetime.datetime.now()
