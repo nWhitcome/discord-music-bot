@@ -3,20 +3,31 @@ import calendar
 from dotenv import load_dotenv
 
 # REQUIRES RESTART OF BOT TO APPLY CHANGES
-
 load_dotenv()
 
-TOKEN = os.getenv('DISCORD_TOKEN')
-suggChannel = os.getenv('SUGG_CHANNEL', '839962435044900874')
-announcementChannel = os.getenv('ANNOUNCEMENT_CHANNEL', '839961783498571867')
-suggChannelMovie = os.getenv('SUGG_CHANNEL_MOVIE', '867434344715649034')
-announcementChannelMovie = os.getenv('ANNOUNCEMENT_CHANNEL_MOVIE', '867434989519634432')
-testChannel = os.getenv('TEST_CHANNEL','840042019971661825')
-testChannelMovie = os.getenv('TEST_CHANNEL_MOVIE','874768828867960902')
+inTest = 0
 commandPrefix = '$'
+noWinnerMusic = 0
+noWinnerMovie = 0
 
+if(inTest):
+    TOKEN = os.getenv('TEST_DISCORD_TOKEN')
+    suggChannel = os.getenv('SUGG_CHANNEL', '840042019971661825')
+    announcementChannel = os.getenv('ANNOUNCEMENT_CHANNEL', '932788538796310550')
+    suggChannelMovie = os.getenv('SUGG_CHANNEL_MOVIE', '932789433147736085')
+    announcementChannelMovie = os.getenv('ANNOUNCEMENT_CHANNEL_MOVIE', '932789700534612068')
+    musicId = "<@&840095047801372762>"
+    movieId = "<@&932795073727451136>"
+else:
+    TOKEN = os.getenv('DISCORD_TOKEN')
+    suggChannel = os.getenv('SUGG_CHANNEL', '839962435044900874')
+    announcementChannel = os.getenv('ANNOUNCEMENT_CHANNEL', '839961783498571867')
+    suggChannelMovie = os.getenv('SUGG_CHANNEL_MOVIE', '867434344715649034')
+    announcementChannelMovie = os.getenv('ANNOUNCEMENT_CHANNEL_MOVIE', '867434989519634432')
+    musicId = "<@&839958672868245504>"
+    movieId = "<@&872896127882633268>"
+    
 # Meeting date & time for the music club
-musicId = "<@&839958672868245504>"
 pollDay = int(os.getenv('POLL_DAY', calendar.MONDAY))
 pollHour = int(os.getenv('POLL_HOUR', 20))
 pollMinute = int(os.getenv('POLL_MINUTE', 0))
@@ -27,7 +38,6 @@ reminderHour = int(os.getenv('MEETING_HOUR', 20))
 reminderMinute = int(os.getenv('MEETING_MINUTE', 0))
 
 # Meeting date & time for the movie club
-movieId = "<@&872896127882633268>"
 pollDayMovie = int(os.getenv('POLL_DAY_MOVIE', calendar.TUESDAY))
 pollHourMovie = int(os.getenv('POLL_HOUR_MOVIE', 12))
 pollMinuteMovie = int(os.getenv('POLL_MINUTE_MOVIE', 0))
