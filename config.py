@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 # REQUIRES RESTART OF BOT TO APPLY CHANGES
 load_dotenv()
 
-inTest = 1
+inTest = 0
 commandPrefix = '$'
 noWinnerMusic = 0
 noWinnerMovie = 0
