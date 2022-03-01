@@ -7,12 +7,13 @@ import setupFunctions as setupFunctions
 
 # Sends out a poll so people can vote on album of the week
 # Takes two inputs: a dictionary used for music suggestions and a bot object to send messages from
-async def sendPoll(dictionary, bot):
+async def sendPoll(dictionary, bot, message):
     if(int(datetime.datetime.now().day) + 1 != setupFunctions.getLastMeetingDay()):
         print("Posting poll...")
+        print(dictionary)
         channel = bot.get_channel(int(config.announcementChannel))
         if(dictionary.items()):
-            pollString = '/poll "' + config.musicId + ', here is the poll for the album of the week:"'
+            pollString = '/poll ' + config.musicId + '\n"' + message + '"'
             for i, j in dictionary.items():
                 pollString += f' "{i} - {j}"'
             await channel.send(pollString)
@@ -38,7 +39,7 @@ async def sendPoll(dictionary, bot):
 # Sends out a reminder for the music meeting 30 minutes before
 async def sendReminder(bot):
         channel = bot.get_channel(int(config.announcementChannel))
-        pollString = config.musicId + ', the meeting for this week is starting in 30 minutes!'
+        pollString = config.musicId + '\n' + 'The meeting for this week is starting in 30 minutes!'
         await channel.send(pollString)
 
 # Chooses a winner from the album poll on the Covid Club server

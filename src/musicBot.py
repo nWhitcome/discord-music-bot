@@ -7,6 +7,7 @@ import config as config
 import musicMeeting as musicMeeting
 import movieMeeting as movieMeeting
 import setupFunctions as setupFunctions
+import messages
 
 bot = Bot(command_prefix=config.commandPrefix)
 
@@ -57,7 +58,7 @@ def runOnce():
             dictionaryMovie[str(row[0])] = str(row[1])
 
         scheduler = AsyncIOScheduler()
-        scheduler.add_job(musicMeeting.sendPoll, 'cron', day_of_week=config.pollDay, hour=config.pollHour, minute=config.pollMinute, args=[dictionary, bot])
+        scheduler.add_job(musicMeeting.sendPoll, 'cron', day_of_week=config.pollDay, hour=config.pollHour, minute=config.pollMinute, args=[dictionary, bot, messages.messages[0]['message']])
         scheduler.add_job(movieMeeting.sendPoll, 'cron', day_of_week=config.pollDayMovie, hour=config.pollHourMovie, minute=config.pollMinuteMovie, args=[dictionary, bot])
         scheduler.add_job(musicMeeting.sendReminder, 'cron', day_of_week=config.meetingDay, hour=config.reminderHour, minute=config.reminderMinute, args=[bot])
         scheduler.add_job(movieMeeting.sendReminder, 'cron', day_of_week=config.meetingDayMovie, hour=config.reminderHourMovie, minute=config.reminderMinuteMovie, args=[bot])
@@ -71,6 +72,13 @@ def runOnce():
         print("Movie reminder set for " + calendar.day_name[config.pollDayMovie] + " " + setupFunctions.hourToPrintStandardTime(config.reminderHourMovie, config.reminderMinuteMovie))
         print("Movie meeting set for " + calendar.day_name[config.meetingDayMovie] + " " + setupFunctions.hourToPrintStandardTime(config.meetingHourMovie, config.meetingMinuteMovie))
         bot.runOnceFlag = 1
+
+def addMessage(message, scheduler):
+    if(message['type'] == 'poll'):
+        scheduler.add_job(musicMeeting.sendPoll, 'cron', day_of_week=config.pollDay, hour=config.pollHour, minute=config.pollMinute, args=[dictionary, bot, message])
+    #elif(message['type'] == 'win'):
+
+
 
 # Allows users to submit a suggestion for album of the week, which is then stored in a database
 @bot.command(name='theme')
@@ -198,7 +206,7 @@ async def listSuggestions(ctx):
 @bot.command(name='poll')
 async def poll(ctx):
     if(config.inTest == 1 and str(ctx.channel.id) == config.suggChannel):
-        await musicMeeting.sendPoll(dictionary, bot)
+        await musicMeeting.sendPoll(dictionary, bot, "test")
 
 # Backup method that can only be called in the TestBot server that puts the album choice poll up in case it fails for some reason
 @bot.command(name='pollMovie')
